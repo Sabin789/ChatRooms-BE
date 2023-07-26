@@ -2,6 +2,8 @@ import { DataTypes, Model } from "sequelize";
 import bcrypt from "bcrypt";
 import sequelize from "../../db";
 import { UserAttributes, UserInstance } from "./types";
+import MessageModel from "../Messages/model";
+import ChatModel from "../ChatRooms/model";
 
 
 
@@ -93,5 +95,9 @@ UserModel.prototype.checkCredentials = async function (email: string, password: 
       return null;
     }
 }
+
+
+UserModel.hasMany(MessageModel,{foreignKey:{name:"MessageId",allowNull:false}})
+
 
 export default UserModel

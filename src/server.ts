@@ -6,6 +6,7 @@ import createHttpError from "http-errors";
 import { BadRequestHandler, ForbiddenHandler, GenericErrorHandler, NotFoundHandler, UnAuthorizedHandler } from "./errorHandlers";
 import UsersRouter from "./Api/Users";
 import listEndpoints from "express-list-endpoints"
+import ChatRouter from "./Api/ChatRooms";
 const expressServer = express();
 const httpServer = createServer(expressServer);
 
@@ -26,6 +27,7 @@ expressServer.use(express.json());
 
 // Mount UsersRouter on the appropriate path
 expressServer.use("/users", UsersRouter);
+expressServer.use("/chat",ChatRouter)
 
 expressServer.use(BadRequestHandler);
 expressServer.use(UnAuthorizedHandler);

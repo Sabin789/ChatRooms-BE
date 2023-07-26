@@ -84,7 +84,7 @@ UsersRouter.get("/:id",JWTTokenAuth,async (req,res,next)=>{
       if(user){
         res.status(200).send(user)
       }else{
-        res.send("User does not exist")
+        createHttpError(404,"User does not exist")
       }
     }catch(err){
         next(err)
@@ -92,7 +92,7 @@ UsersRouter.get("/:id",JWTTokenAuth,async (req,res,next)=>{
 })
 
 
-UsersRouter.put("/:id", async (req,res,next)=>{
+UsersRouter.put("/:id",JWTTokenAuth, async (req,res,next)=>{
     try{
         const user=await UserModel.findByPk(req.params.id)
         if(user){
@@ -102,33 +102,38 @@ UsersRouter.put("/:id", async (req,res,next)=>{
               });
             
               if (updatedRowCount === 0) {
-                res.send("No user woth that id exists")
+                res.send("No user with that id exists")
               } else {
 
                 res.send(updatedUsers);
               }
              
           }else{
-            res.send("User does not exist")
-          } 
+            createHttpError(404,"User does not exist")
+        } 
     }catch(err){
         next(err)
     }
 })
 
-// UsersRouter.delete("/me/session",JWTTokenAuth,async(req,res,next)=>{
-//     try {
-//         const user=await UsersModel.findByIdAndUpdate((req as UserRequest).user._id,{
-//             refreshToken:""
-//         })
-//         res.send(user);
-//     } catch (err) {
-//         next(err)
-//     }
-// })
+UsersRouter.delete("/me/session",JWTTokenAuth,async(req,res,next)=>{
+    try {
+        const user=await UserModel.findByPk((req as UserRequest).user._id)
+        if(user){
+            user.refreshToken = ""
+            await user.save()
+      
+            res.send("Refresh token deleted successfully")
+        }else{
+            res.send("No session to delete")
+        }
+    } catch (err) {
+        next(err)
+    }
+})
 
 
-UsersRouter.delete("/:id", async (req,res,next)=>{
+UsersRouter.delete("/:id",JWTTokenAuth, async (req,res,next)=>{
     try{
         const user=await UserModel.findByPk(req.params.id)
         if(user){
@@ -137,12 +142,12 @@ UsersRouter.delete("/:id", async (req,res,next)=>{
               });
             
               if (deletedRowCount === 0) {
-                // No user found with the specified id
-                // Handle the error or send an appropriate response
+                createHttpError(404,"No user with that id found")
               } else {
-                // User deleted successfully
                 res.send(`User with id ${req.params.id} deleted`);
               }
+    }else{
+        createHttpError(404,"User does not exist")
     }}catch(err){
         next(err)
     }

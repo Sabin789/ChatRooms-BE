@@ -6,8 +6,6 @@ import MessageModel from "../Messages/model";
 import ChatModel from "../ChatRooms/model";
 
 
-
-
 const UserModel= sequelize.define<UserInstance,UserAttributes>("user",{
     UserId:{
         type: DataTypes.UUID,
@@ -80,24 +78,38 @@ UserModel.prototype.toJSON = function () {
     delete userObj.createdAt;
     delete userObj.updatedAt;
     delete userObj.__v;
-  
     return userObj;
 };
 
 UserModel.prototype.checkCredentials = async function (email: string, password: string): Promise<UserInstance | null> {
     const user = this as UserInstance;
     
-    // Perform your credentials checking logic here
-    // For example, compare the provided email and password with the user's stored credentials
-    if (user.email === email && user.password === password) {
-      return user;
-    } else {
-      return null;
+   
+    if(user){
+        const matchingPassword=await bcrypt.compare(password,user.password)
+        if(!matchingPassword)  return null
+    return user
+    }else return null
     }
-}
+  
+UserModel.belongsToMany(ChatModel, 
+    { through: 'ChatMembers',
+     foreignKey: 'UserId',
+     otherKey: 'ChatId' });
+
+ChatModel.belongsToMany(UserModel, 
+    { through: 'ChatMembers',
+     foreignKey: 'ChatId',
+    otherKey:'UserId' });
 
 
-UserModel.hasMany(MessageModel,{foreignKey:{name:"MessageId",allowNull:false}})
+UserModel.hasMany(MessageModel,
+    {foreignKey:{name:"MessageId",
+    allowNull:false}})
 
+ChatModel.belongsTo(UserModel, {
+    foreignKey: 'UserId', 
+    as: 'host', 
+  })
 
 export default UserModel

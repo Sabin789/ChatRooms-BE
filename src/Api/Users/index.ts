@@ -38,6 +38,7 @@ UsersRouter.post("/login", async (req, res, next) => {
   
         if (!authenticatedUser) {
           next(createHttpError(401, "Wrong Credentials!"));
+          console.log(user)
         } else {
           const payload = {
             email: authenticatedUser.email,

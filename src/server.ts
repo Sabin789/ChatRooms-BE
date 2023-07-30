@@ -7,8 +7,13 @@ import { BadRequestHandler, ForbiddenHandler, GenericErrorHandler, NotFoundHandl
 import UsersRouter from "./Api/Users";
 import listEndpoints from "express-list-endpoints"
 import ChatRouter from "./Api/ChatRooms";
+import { Server } from "socket.io";
+import { newConnectionHandler } from "./socket";
 const expressServer = express();
 const httpServer = createServer(expressServer);
+const socketioServer = new Server(httpServer);
+
+
 
 const whiteList = [process.env.FE_DEV_URL, process.env.FE_PROD_URL];
 
@@ -21,6 +26,10 @@ const corsOptions:CorsOptions = {
     }
   },
 };
+
+
+socketioServer.on("connect", newConnectionHandler)
+
 
 expressServer.use(cors(corsOptions));
 expressServer.use(express.json());
